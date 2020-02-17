@@ -3,6 +3,16 @@
     <head>
         <title>gridmaker</title>
 
+        <style>
+        * {
+            user-select: none;
+        }
+
+        textarea {
+            font-family: Courier;
+        }
+        </style>
+
         <script src="dist/bundle.js"></script>
 
     </head>
@@ -11,7 +21,7 @@
 
         <div id="canvas-container"></div>
 
-        <textarea id="export-textarea"></textarea>
+        <textarea id="export-textarea" cols="50" rows="10"></textarea>
 
         <button id="import-button">Import</button>
 

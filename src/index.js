@@ -16,12 +16,18 @@ window.addEventListener('DOMContentLoaded', () =>{
 
     const ctx = canvas.getContext('2d');
 
+    let startRow = 0;
+    let startCol = 0;
+
     const rows = Config.CANVAS_HEIGHT / Config.CELL_SIZE;
     const cols = Config.CANVAS_WIDTH / Config.CELL_SIZE;
 
     const valuesMap = {};
 
     textArea.addEventListener('change', () => {
+        startRow = 0;
+        startCol = 0;
+
         Object.keys(valuesMap).forEach(key => {
             delete valuesMap[key];
         });
@@ -32,6 +38,17 @@ window.addEventListener('DOMContentLoaded', () =>{
                 setValue(row, col, value);
             });
         });
+
+        render();
+    }, false);
+
+    window.addEventListener('keyup', event => {
+        if (event.keyCode === 37) startCol--;
+        if (event.keyCode === 38) startRow--;
+        if (event.keyCode === 39) startCol++;
+        if (event.keyCode === 40) startRow++;
+
+        console.log(event.keyCode);
 
         render();
     }, false);
@@ -62,7 +79,7 @@ window.addEventListener('DOMContentLoaded', () =>{
     function renderCells() {
         for (let row = 0 ; row < rows ; row++) {
             for (let col = 0 ; col < cols ; col++) {
-                ctx.fillStyle = COLORS[getValue(row, col)];
+                ctx.fillStyle = COLORS[getValue(row + startRow, col + startCol)];
                 ctx.fillRect(
                     col * Config.CELL_SIZE,
                     row * Config.CELL_SIZE,
@@ -79,8 +96,8 @@ window.addEventListener('DOMContentLoaded', () =>{
         const x = canvas.width * ((event.pageX - rect.left) / rect.width);
         const y = canvas.height * ((event.pageY - rect.top) / rect.height);
 
-        const row = Math.floor(y / Config.CELL_SIZE);
-        const col = Math.floor(x / Config.CELL_SIZE);
+        const row = Math.floor(y / Config.CELL_SIZE) + startRow;
+        const col = Math.floor(x / Config.CELL_SIZE) + startCol;
 
         setValue(row, col, (getValue(row, col) + 1) % COLORS.length);
 
