@@ -44,11 +44,10 @@ window.addEventListener('DOMContentLoaded', () =>{
 
     window.addEventListener('keyup', event => {
         if (event.keyCode === 37) startCol--;
-        if (event.keyCode === 38) startRow--;
-        if (event.keyCode === 39) startCol++;
-        if (event.keyCode === 40) startRow++;
-
-        console.log(event.keyCode);
+        else if (event.keyCode === 38) startRow--;
+        else if (event.keyCode === 39) startCol++;
+        else if (event.keyCode === 40) startRow++;
+        else return;
 
         render();
     }, false);
