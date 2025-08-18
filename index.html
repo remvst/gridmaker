@@ -11,6 +11,20 @@
         textarea {
             font-family: Courier;
         }
+
+        #color-picker div {
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            margin: 4px;
+            border: 1px solid black;
+            cursor: pointer;
+            box-shadow: 2px 2px 0px #888;
+        }
+
+        #color-picker div:hover, #color-picker div.selected {
+            border: 1px solid red;
+        }
         </style>
 
         <script src="dist/bundle.js"></script>
@@ -20,6 +34,8 @@
     <body>
 
         <div id="canvas-container"></div>
+
+        <div id="color-picker"></div>
 
         <textarea id="export-textarea" cols="50" rows="10"></textarea>
 

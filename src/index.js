@@ -2,15 +2,37 @@
 
 const Config = require('./config');
 
-const COLORS = ['black', 'white', 'blue', 'red', 'green'];
+const COLORS = ['black', 'white', 'blue', 'red', 'green', 'yellow', 'purple'];
 const KEY_SEPARATOR = ',';
+
+const MOUSE = {
+    row: 0,
+    col: 0,
+    down: false,
+    erasing: false,
+};
+
+let CURRENT_VALUE = 0;
 
 window.addEventListener('DOMContentLoaded', () =>{
     const canvas = document.createElement('canvas');
     canvas.width = Config.CANVAS_WIDTH;
     canvas.height = Config.CANVAS_HEIGHT;
-    canvas.addEventListener('click', click, false);
+    canvas.addEventListener('mousedown', mousedown, false);
+    canvas.addEventListener('mousemove', mousemove, false);
+    canvas.addEventListener('mouseup', mouseup, false);
+    canvas.addEventListener('contextmenu', contextmenu, false);
     document.querySelector('#canvas-container').appendChild(canvas);
+
+    for (let i = 1 ; i < COLORS.length ; i++) {
+        const colorDiv = document.createElement('div');
+        colorDiv.style.backgroundColor = COLORS[i];
+        colorDiv.dataset.value = i;
+        colorDiv.addEventListener('click', () => setCurrentValue(i), false);
+        document.querySelector('#color-picker').appendChild(colorDiv);
+    }
+
+    setCurrentValue(1);
 
     const textArea = document.querySelector('#export-textarea');
 
@@ -54,6 +76,18 @@ window.addEventListener('DOMContentLoaded', () =>{
 
     render();
 
+    function setCurrentValue(value) {
+        CURRENT_VALUE = value;
+
+        for (const swatch of document.querySelectorAll('#color-picker div')) {
+            if (CURRENT_VALUE === parseInt(swatch.dataset.value)) {
+                swatch.classList.add('selected');
+            } else {
+                swatch.classList.remove('selected');
+            }
+        }
+    }
+
     function render() {
         ctx.fillStyle = '#000';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -66,12 +100,22 @@ window.addEventListener('DOMContentLoaded', () =>{
 
     function renderGrid() {
         ctx.save();
-        ctx.globalAlpha = 0.5;
-        ctx.fillStyle = '#fff';
+        ctx.fillStyle = '#888';
         for (let i = 0 ; i < Math.max(rows, cols) ; i++) {
-            ctx.fillRect(0, i * Config.CELL_SIZE - 1, Config.CANVAS_WIDTH, 2);
-            ctx.fillRect(i * Config.CELL_SIZE - 1, 0, 2, Config.CANVAS_WIDTH);
+            ctx.fillRect(0, i * Config.CELL_SIZE - 1, Config.CANVAS_WIDTH, 1);
+            ctx.fillRect(i * Config.CELL_SIZE - 1, 0, 1, Config.CANVAS_WIDTH);
         }
+        ctx.restore();
+
+        ctx.save();
+        ctx.strokeStyle = '#f00';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(
+            MOUSE.col * Config.CELL_SIZE,
+            MOUSE.row * Config.CELL_SIZE,
+            Config.CELL_SIZE,
+            Config.CELL_SIZE,
+        );
         ctx.restore();
     }
 
@@ -89,16 +133,32 @@ window.addEventListener('DOMContentLoaded', () =>{
         }
     }
 
-    function click(event) {
+    function contextmenu(e) {
+        e.preventDefault();
+    }
+
+    function mousedown(e) {
+        MOUSE.down = true;
+        MOUSE.erasing = e.which === 3;
+        mousemove(e);
+    }
+
+    function mouseup() {
+        MOUSE.down = null;
+    }
+
+    function mousemove(event) {
         const rect = canvas.getBoundingClientRect();
 
         const x = canvas.width * ((event.pageX - rect.left) / rect.width);
         const y = canvas.height * ((event.pageY - rect.top) / rect.height);
 
-        const row = Math.floor(y / Config.CELL_SIZE) + startRow;
-        const col = Math.floor(x / Config.CELL_SIZE) + startCol;
+        MOUSE.row = Math.floor(y / Config.CELL_SIZE) + startRow;
+        MOUSE.col = Math.floor(x / Config.CELL_SIZE) + startCol;
 
-        setValue(row, col, (getValue(row, col) + 1) % COLORS.length);
+        if (MOUSE.down) {
+            setValue(MOUSE.row, MOUSE.col, MOUSE.erasing ? 0 : CURRENT_VALUE);
+        }
 
         render();
     }
